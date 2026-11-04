@@ -5,80 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f1216">
-<title>Dakar Studio - Magic Hour</title>
+<title>Dakar Studio - Studio de Production</title>
 <style>
   :root { --bg:#0f1216; --card:#1a1f26; --fg:#e8ecf1; --muted:#8a93a0;
-          --accent:#ff8a3d; --ok:#2fbf71; --err:#e5484d; --warn:#f5a524; }
+          --accent:#ff8a3d; --ok:#2fbf71; --line:#252b33; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin:0 auto; padding:16px 12px 90px; max-width:720px;
+  body { margin:0 auto; padding:16px 12px 40px; max-width:720px;
          font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
          background:var(--bg); color:var(--fg); }
-  h1 { font-size:20px; margin:0 0 4px; }
-  .sub { color:var(--muted); font-size:13px; margin-bottom:16px; }
-  .card { background:var(--card); border-radius:14px; padding:14px; margin-bottom:12px; }
-  input, button { font:inherit; }
-  input { width:100%; padding:12px; border-radius:10px; border:1px solid #2a313b;
-          background:#0b0e12; color:var(--fg); }
-  button { border:0; border-radius:10px; padding:12px 16px; background:var(--accent);
-           color:#111; font-weight:600; cursor:pointer; }
-  button.secondary { background:#2a313b; color:var(--fg); }
-  button:disabled { opacity:.5; cursor:wait; }
-  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .shot { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid #252b33; }
-  .shot:last-child { border:0; }
-  .thumb { width:64px; height:114px; background:#0b0e12; border-radius:8px;
-           flex-shrink:0; object-fit:cover; border:1px solid #2a313b; }
-  .info { flex:1; min-width:0; }
-  .info b { font-size:14px; }
-  .lieu { color:var(--muted); font-size:12px; margin-top:2px; }
-  .badge { display:inline-block; font-size:11px; padding:2px 8px;
-           border-radius:999px; margin-top:6px; }
-  .s-pending { background:#2a313b; color:var(--muted); }
-  .s-image   { background:#3a2e1a; color:var(--warn); }
-  .s-video   { background:#1a2a1f; color:var(--ok); }
-  .s-done    { background:#1a2a1f; color:var(--ok); }
-  .s-error   { background:#3a1a1c; color:var(--err); }
-  .actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
-  .actions button { padding:8px 12px; font-size:13px; }
-  #log { font-family:ui-monospace,monospace; font-size:11px; color:var(--muted);
-         max-height:110px; overflow:auto; background:#0b0e12;
-         border-radius:8px; padding:8px; margin-top:8px; white-space:pre-wrap; }
-  .sticky { position:fixed; bottom:0; left:0; right:0; padding:12px;
-            background:linear-gradient(transparent,var(--bg) 30%); z-index:10; }
-  .sticky-inner { display:flex; gap:8px; max-width:720px; margin:0 auto; }
-  .sticky button { flex:1; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
+  .card { background:var(--card); border-radius:14px; padding:16px; margin-bottom:16px; border: 1px solid var(--line); }
+  .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .title { font-size: 16px; font-weight: bold; }
+  .lieu { color:var(--muted); font-size:13px; font-weight: normal; margin-top: 2px;}
+  
+  .section-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 6px; font-weight: 600; }
+  .prompt-box { background: #0b0e12; border: 1px solid #2a313b; border-radius: 8px; padding: 12px; position: relative; font-family: ui-monospace,monospace; font-size: 13px; line-height: 1.5; color: #c8d1de; }
+  .btn-copy { position: absolute; top: 8px; right: 8px; background: #2a313b; border: 0; color: var(--fg); padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .btn-copy:active { background: var(--accent); color: #111; }
+  
+  .dialogue-box { background: #1a2a1f; border: 1px solid #2fbf71; border-radius: 8px; padding: 12px; color: #e8ecf1; font-size: 14px; position: relative; }
+  .dialogue-box .btn-copy { background: #2fbf71; color: #111; }
+  
+  .checkbox-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--line); cursor: pointer; }
+  .checkbox-row input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .checkbox-row span { font-weight: 600; font-size: 14px; }
+  .is-done { opacity: 0.5; }
+  .is-done .title { text-decoration: line-through; }
+  
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ok); color: #111; padding: 10px 20px; border-radius: 999px; font-weight: bold; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
 </style>
 </head>
 <body>
 <header>
   <h1>🎬 Dakar Studio</h1>
-  <div class="sub">Épisode 1 · Le Port · 18 plans · vertical 9:16</div>
+  <div class="sub">Tableau de production · Épisode 1 · Le Port</div>
 </header>
-
-<section class="card">
-  <label style="font-size:13px;color:var(--muted)">Clé API Magic Hour</label>
-  <div class="row" style="margin-top:8px">
-    <input id="key" type="password" placeholder="colle ta clé Magic Hour ici" style="flex:1">
-    <button class="secondary" onclick="saveKey()">OK</button>
-  </div>
-  <div id="keyStatus" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
-</section>
-
-<section class="card">
-  <div class="row">
-    <button id="btnAll" onclick="generateAll()">▶ Générer tout</button>
-    <button class="secondary" id="btnRetry" onclick="retryErrors()" style="display:none">↻ Réessayer les erreurs</button>
-  </div>
-  <div id="log">prêt. (Garde l'écran allumé pendant la génération)</div>
-</section>
 
 <section id="shots"></section>
 
-<div class="sticky"><div class="sticky-inner">
-  <button onclick="downloadAll()">⬇ Télécharger tous les clips prêts</button>
-</div></div>
+<div id="toast" class="toast">Copié !</div>
 
 <script>
+// --- DONNÉES ---
 const STYLE = "STYLE: Stylized 3D animated render, cinematic action-film look with expressive faces, soft volumetric lighting and shallow depth of field. Warm Dakar palette of sunset orange, teal shadows and deep indigo night, vertical 9:16 framing.";
 const PERSOS = {
   MOUSSA:"Moussa, a 45-year-old Senegalese man, broad shoulders, short grey-flecked beard, small scar over left eyebrow, wearing a worn olive jacket over a white t-shirt and dark jeans.",
@@ -86,6 +56,7 @@ const PERSOS = {
   BAMBA:"Bamba, a 19-year-old Senegalese young man, lean, short curly hair, bright smile, wearing a red football jersey and denim shorts.",
   SARR:"Cheikh Sarr, a 55-year-old Senegalese man, tall, silver hair, trimmed goatee, calm cold eyes, wearing an impeccable navy three-piece suit and a gold watch."
 };
+
 const SHOTS = [
  {id:1,lieu:"Port, nuit",dialogue:[],prompt:"Low-angle wide shot, a cargo container bursts into orange flames at a night port, {MOUSSA} dives behind a crate, sparks flying, camera shake."},
  {id:2,lieu:"Appartement, aube",dialogue:[{perso:"MOUSSA",texte:"Ibou… je te dois la vérité."}],prompt:"Slow push-in close-up, {MOUSSA} holding an old photo of two police officers, dawn light through a window."},
@@ -107,257 +78,82 @@ const SHOTS = [
  {id:18,lieu:"Cliffhanger",dialogue:[{perso:"SARR",texte:"Viens seul, Moussa. Ibou t'attend."}],prompt:"Slow push-in on {MOUSSA}'s shocked face, phone at his ear, shallow depth of field, cut to black."}
 ];
 
-const STATE = {};
-SHOTS.forEach(s => STATE[s.id] = { status:'pending' });
+// --- LOGIQUE ---
+const STATE = JSON.parse(localStorage.getItem('dakar_state')) || {};
+SHOTS.forEach(s => {
+  if (STATE[s.id] === undefined) STATE[s.id] = { done: false };
+});
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const log = m => {
-  const el = document.getElementById('log');
-  const t = new Date().toLocaleTimeString();
-  el.textContent = `[${t}] ${m}\n` + el.textContent;
-  checkErrors();
-};
-
-function saveKey() {
-  const k = document.getElementById('key').value.trim();
-  if (k) { localStorage.setItem('magichour_key', k); refreshKeyStatus(); }
-}
-function refreshKeyStatus() {
-  const k = localStorage.getItem('magichour_key');
-  document.getElementById('keyStatus').textContent =
-    k ? `✓ clé enregistrée (${k.slice(0,6)}…)` : '⚠️ aucune clé enregistrée';
-}
-
-// Fonction API générique
-async function api(path, body, method='POST', retries=3) {
-  const key = localStorage.getItem('magichour_key');
-  if (!key) throw new Error('clé API manquante');
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      const res = await fetch(`https://api.magichour.ai/v1${path}`, {
-        method,
-        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined
-      });
-      
-      if (res.status === 429) {
-        log(`⏳ Limite atteinte. Pause de 60s...`);
-        await sleep(60000);
-        continue;
-      }
-      
-      if (!res.ok) {
-        const errText = await res.text();
-        if (res.status >= 500 && attempt < retries) {
-          log(`⚠️ Serveur occupé (${res.status}). Nouvelle tentative dans 10s...`);
-          await sleep(10000);
-          continue;
-        }
-        throw new Error(`${res.status} · ${errText.slice(0,100)}`);
-      }
-      
-      return await res.json();
-    } catch (e) {
-      if (e.message.includes('Failed to fetch') && attempt < retries) {
-        log(`⚠️ Erreur réseau. Nouvelle tentative dans 5s...`);
-        await sleep(5000);
-        continue;
-      }
-      throw e;
-    }
-  }
+function saveState() {
+  localStorage.setItem('dakar_state', JSON.stringify(STATE));
 }
 
 function buildPrompt(shot) {
   let p = shot.prompt;
-  for (const [k,v] of Object.entries(PERSOS))
+  for (const [k,v] of Object.entries(PERSOS)) {
     p = p.split('{'+k+'}').join(v);
+  }
   return `${STYLE}\n\n${p}`;
 }
 
-// 1. GÉNÉRATION IMAGE (Magic Hour)
-async function genImage(shot) {
-  const st = STATE[shot.id];
-  st.status = 'image'; st.error = null; render();
-  try {
-    // A. Création du projet image
-    const job = await api('/ai-image-generator', {
-      name: `Plan ${shot.id} - ${shot.lieu}`,
-      image_count: 1,
-      model: 'z-image-turbo',
-      aspect_ratio: '9:16',
-      resolution: '720p',
-      style: {
-        prompt: buildPrompt(shot),
-        tool: 'ai-anime-generator' // ou 'ai-image-generator' standard
-      }
-    });
-    
-    const projectId = job.id;
-    if (!projectId) throw new Error("Pas d'ID de projet image");
-
-    // B. Attente de la fin de génération
-    let tries = 0;
-    while (tries < 30) {
-      await sleep(3000);
-      const d = await api(`/image-projects/${projectId}`, null, 'GET');
-      
-      if (d.status === 'complete') {
-        st.imageUrl = d.downloads[0].url;
-        log(`✓ image plan ${shot.id} générée`);
-        render();
-        return true;
-      }
-      if (d.status === 'error') throw new Error('Échec génération image');
-      tries++;
-    }
-    throw new Error('Délai image dépassé');
-  } catch(e) {
-    st.status = 'error'; st.error = e.message;
-    log(`✗ image ${shot.id} : ${e.message}`);
-    render();
-    return false;
-  }
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+  });
 }
 
-// 2. GÉNÉRATION VIDÉO (Magic Hour)
-async function genVideo(shot) {
-  const st = STATE[shot.id];
-  st.status = 'video'; render();
-  try {
-    // A. Création du projet vidéo
-    const job = await api('/image-to-video', {
-      name: `Plan ${shot.id} - ${shot.lieu}`,
-      end_seconds: 5,
-      model: 'ltx-2.5',
-      resolution: '480p',
-      audio: false,
-      style: { prompt: buildPrompt(shot) },
-      assets: {
-        image_file_path: st.imageUrl // On passe l'URL publique de l'image
-      }
-    });
-
-    const projectId = job.id;
-    if (!projectId) throw new Error("Pas d'ID de projet vidéo");
-    
-    log(`⏳ vidéo plan ${shot.id} en cours...`);
-
-    // B. Attente de la fin de génération
-    let tries = 0;
-    while (tries < 60) {
-      await sleep(5000);
-      const d = await api(`/video-projects/${projectId}`, null, 'GET');
-      
-      if (d.status === 'complete') {
-        st.videoUrl = d.downloads[0].url;
-        st.status = 'done';
-        log(`✓ vidéo plan ${shot.id} terminée !`);
-        render();
-        return true;
-      }
-      if (d.status === 'error') throw new Error('Échec génération vidéo');
-      tries++;
-      if (tries % 4 === 0) log(`… plan ${shot.id} toujours en cours...`);
-    }
-    throw new Error('Délai vidéo dépassé');
-  } catch(e) {
-    st.status = 'error'; st.error = e.message;
-    log(`✗ vidéo ${shot.id} : ${e.message}`);
-    render();
-    return false;
-  }
-}
-
-async function runShot(shot) {
-  const st = STATE[shot.id];
-  if (!st.imageUrl) { if (!(await genImage(shot))) return; }
-  await sleep(2000); 
-  await genVideo(shot);
-}
-
-async function generateAll() {
-  const btn = document.getElementById('btnAll');
-  btn.disabled = true; btn.textContent = '⏳ en cours…';
-  for (const shot of SHOTS) {
-    if (STATE[shot.id].status === 'done') continue;
-    await runShot(shot);
-    await sleep(3000); 
-  }
-  btn.disabled = false; btn.textContent = '▶ Générer tout';
-  log('🏁 Terminé.');
-}
-
-async function retryErrors() {
-  const btn = document.getElementById('btnRetry');
-  btn.disabled = true; btn.textContent = '⏳...';
-  const errors = SHOTS.filter(s => STATE[s.id].status === 'error');
-  log(`↻ Relance de ${errors.length} plans...`);
-  for (const shot of errors) {
-    if (!STATE[shot.id].imageUrl) await genImage(shot);
-    await genVideo(shot);
-    await sleep(3000);
-  }
-  btn.disabled = false; btn.textContent = '↻ Réessayer les erreurs';
-}
-
-function checkErrors() {
-  const hasErrors = Object.values(STATE).some(s => s.status === 'error');
-  document.getElementById('btnRetry').style.display = hasErrors ? 'block' : 'none';
-}
-
-function download(url, filename) {
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a); a.click();
-  setTimeout(() => { a.remove(); }, 1500);
-}
-function downloadShot(shot) {
-  const st = STATE[shot.id];
-  const n = `ep01_plan_${String(shot.id).padStart(2,'0')}.mp4`;
-  if (st.videoUrl) download(st.videoUrl, n);
-}
-async function downloadAll() {
-  for (const shot of SHOTS) {
-    if (STATE[shot.id].videoUrl) {
-      downloadShot(shot);
-      await sleep(1000);
-    }
-  }
+function toggleDone(id) {
+  STATE[id].done = !STATE[id].done;
+  saveState();
+  render();
 }
 
 function render() {
   document.getElementById('shots').innerHTML = SHOTS.map(s => {
-    const st = STATE[s.id];
-    const label = {pending:'en attente', image:'image générée', video:'vidéo en cours…',
-                   done:'prêt', error:'erreur'}[st.status] || st.status;
-    const media = st.videoUrl
-      ? `<video class="thumb" src="${st.videoUrl}" controls muted playsinline></video>`
-      : st.imageUrl
-        ? `<img class="thumb" src="${st.imageUrl}">`
-        : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px">plan ${s.id}</div>`;
-    const dlg = s.dialogue.map(d => `${d.perso}: « ${d.texte} »`).join(' · ') || '(sans dialogue)';
-    const err = st.error ? ' · ' + st.error.slice(0,40) + '...' : '';
-    return `<div class="card shot">
-      ${media}
-      <div class="info">
-        <b>Plan ${s.id} · ${s.lieu}</b>
-        <div class="lieu">${dlg}</div>
-        <span class="badge s-${st.status}">${label}${err}</span>
-        <div class="actions">
-          <button onclick="runShot(SHOTS[${s.id-1}])">${st.status==='done'?'↻ régénérer':'▶ générer'}</button>
-          ${st.videoUrl
-            ? `<button class="secondary" onclick="downloadShot(SHOTS[${s.id-1}])">⬇ télécharger</button>`
-            : ''}
+    const isDone = STATE[s.id].done;
+    const imgPrompt = buildPrompt(s);
+    const dlgText = s.dialogue.map(d => `${d.perso}: ${d.texte}`).join('\n');
+    
+    return `
+    <div class="card ${isDone ? 'is-done' : ''}">
+      <div class="header-row">
+        <div>
+          <div class="title">Plan ${s.id}</div>
+          <div class="lieu">${s.lieu}</div>
         </div>
       </div>
-    </div>`;
+
+      <div class="section-title">1. Prompt Image (Agnes / Midjourney)</div>
+      <div class="prompt-box">
+        ${imgPrompt}
+        <button class="btn-copy" onclick="copyText(\`${imgPrompt.replace(/`/g, '\\`')}\`)">Copier</button>
+      </div>
+
+      <div class="section-title">2. Prompt Vidéo (Image-to-Video)</div>
+      <div class="prompt-box">
+        ${imgPrompt}
+        <button class="btn-copy" onclick="copyText(\`${imgPrompt.replace(/`/g, '\\`')}\`)">Copier</button>
+      </div>
+
+      ${dlgText ? `
+      <div class="section-title">3. Dialogue (Pour CapCut / TTS)</div>
+      <div class="dialogue-box">
+        ${dlgText.replace(/\n/g, '<br>')}
+        <button class="btn-copy" onclick="copyText(\`${dlgText.replace(/`/g, '\\`')}\`)">Copier</button>
+      </div>
+      ` : ''}
+
+      <div class="checkbox-row" onclick="toggleDone(${s.id})">
+        <input type="checkbox" ${isDone ? 'checked' : ''} onclick="event.stopPropagation(); toggleDone(${s.id})">
+        <span>Scène générée et téléchargée</span>
+      </div>
+    </div>
+    `;
   }).join('');
-  checkErrors();
 }
 
-refreshKeyStatus();
 render();
 </script>
 </body>
