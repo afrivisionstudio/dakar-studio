@@ -5,42 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f1216">
-<title>Dakar Studio - Studio de Production</title>
+<title>Dakar Studio - Console de Production</title>
 <style>
-  :root { --bg:#0f1216; --card:#1a1f26; --fg:#e8ecf1; --muted:#8a93a0;
-          --accent:#ff8a3d; --ok:#2fbf71; --line:#252b33; }
+  :root { --bg:#090a0f; --card:#141821; --fg:#e2e8f0; --muted:#94a3b8;
+          --accent:#f59e0b; --ok:#10b981; --err:#ef4444; --line:#1e293b; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin:0 auto; padding:16px 12px 40px; max-width:720px;
-         font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  body { margin:0 auto; padding:16px 12px 40px; max-width:800px;
+         font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
          background:var(--bg); color:var(--fg); }
-  h1 { font-size:22px; margin:0 0 4px; }
-  .sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
-  .card { background:var(--card); border-radius:14px; padding:16px; margin-bottom:16px; border: 1px solid var(--line); }
-  .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-  .title { font-size: 16px; font-weight: bold; }
-  .lieu { color:var(--muted); font-size:13px; font-weight: normal; margin-top: 2px;}
   
-  .section-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 6px; font-weight: 600; }
-  .prompt-box { background: #0b0e12; border: 1px solid #2a313b; border-radius: 8px; padding: 12px; position: relative; font-family: ui-monospace,monospace; font-size: 13px; line-height: 1.5; color: #c8d1de; }
-  .btn-copy { position: absolute; top: 8px; right: 8px; background: #2a313b; border: 0; color: var(--fg); padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
-  .btn-copy:active { background: var(--accent); color: #111; }
+  header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  h1 { font-size:24px; margin:0 0 4px; letter-spacing: -0.5px; }
+  .sub { color:var(--accent); font-size:13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
   
-  .dialogue-box { background: #1a2a1f; border: 1px solid #2fbf71; border-radius: 8px; padding: 12px; color: #e8ecf1; font-size: 14px; position: relative; }
-  .dialogue-box .btn-copy { background: #2fbf71; color: #111; }
+  .card { background:var(--card); border-radius:12px; padding:16px; margin-bottom:20px; border: 1px solid var(--line); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
   
-  .checkbox-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--line); cursor: pointer; }
-  .checkbox-row input { width: 20px; height: 20px; accent-color: var(--accent); }
-  .checkbox-row span { font-weight: 600; font-size: 14px; }
-  .is-done { opacity: 0.5; }
-  .is-done .title { text-decoration: line-through; }
+  .shot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .shot-title { font-size: 18px; font-weight: bold; color: var(--fg); }
+  .shot-lieu { color:var(--muted); font-size:13px; margin-top: 2px; }
+  .shot-num { background: var(--accent); color: #000; font-weight: 900; padding: 4px 10px; border-radius: 6px; font-size: 14px; }
   
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ok); color: #111; padding: 10px 20px; border-radius: 999px; font-weight: bold; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
+  .section-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  
+  .prompt-box { background: #0b0e14; border: 1px solid var(--line); border-radius: 8px; padding: 14px; position: relative; font-family: ui-monospace,monospace; font-size: 13px; line-height: 1.6; color: #cbd5e1; }
+  .btn-copy { position: absolute; top: 10px; right: 10px; background: #1e293b; border: 0; color: var(--fg); padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-copy:active { background: var(--accent); color: #000; }
+  
+  .dialogue-box { background: #0f172a; border-left: 4px solid var(--accent); border-radius: 4px; padding: 12px 14px; color: var(--fg); font-size: 14px; position: relative; font-style: italic; }
+  .dialogue-speaker { font-style: normal; font-weight: bold; color: var(--accent); display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; }
+  
+  .validation-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); cursor: pointer; user-select: none; }
+  .validation-box { width: 24px; height: 24px; border: 2px solid var(--line); border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .validation-row input { display: none; }
+  .validation-row input:checked + .validation-box { background: var(--ok); border-color: var(--ok); }
+  .validation-row input:checked + .validation-box::after { content: '✓'; color: #fff; font-size: 16px; font-weight: bold; }
+  .validation-row span { font-weight: 600; font-size: 14px; color: var(--muted); }
+  .validation-row input:checked ~ span { color: var(--ok); text-decoration: line-through; }
+  
+  .is-done { opacity: 0.6; border-color: var(--ok); }
+  
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ok); color: #fff; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 </style>
 </head>
 <body>
 <header>
-  <h1>🎬 Dakar Studio</h1>
-  <div class="sub">Tableau de production · Épisode 1 · Le Port</div>
+  <h1>Dakar Studio</h1>
+  <div class="sub">Saison 1 · Épisode 1 : Le Port</div>
 </header>
 
 <section id="shots"></section>
@@ -48,52 +59,118 @@
 <div id="toast" class="toast">Copié !</div>
 
 <script>
-// --- DONNÉES ---
-const STYLE = "STYLE: Stylized 3D animated render, cinematic action-film look with expressive faces, soft volumetric lighting and shallow depth of field. Warm Dakar palette of sunset orange, teal shadows and deep indigo night, vertical 9:16 framing.";
+// --- PARAMÈTRES DU STUDIO ---
+const STYLE_3D = "STYLE: Stylized 3D animated render, cinematic espionage thriller look. Highly detailed textures, soft volumetric lighting, shallow depth of field. Warm Dakar palette of sunset orange, teal shadows and deep indigo night. Vertical 9:16 framing. 8k resolution, Unreal Engine 5 render style.";
+const STYLE_ANIM = "ANIMATION: Smooth 3D animation, cinematic camera movement, realistic physics, subtle motion blur.";
+
+// --- FICHES PERSONNAGES EXACTES ---
 const PERSOS = {
-  MOUSSA:"Moussa, a 45-year-old Senegalese man, broad shoulders, short grey-flecked beard, small scar over left eyebrow, wearing a worn olive jacket over a white t-shirt and dark jeans.",
-  AICHA:"Aicha, a 26-year-old Senegalese woman, oval face, braided hair in a high bun, round glasses, wearing a mustard-yellow jacket with a camera strap across her chest.",
-  BAMBA:"Bamba, a 19-year-old Senegalese young man, lean, short curly hair, bright smile, wearing a red football jersey and denim shorts.",
-  SARR:"Cheikh Sarr, a 55-year-old Senegalese man, tall, silver hair, trimmed goatee, calm cold eyes, wearing an impeccable navy three-piece suit and a gold watch."
+  MOUSSA: "Moussa: A 45-year-old Senegalese man, broad shoulders, short grey-flecked beard, small scar over left eyebrow, wearing a worn olive jacket over a white t-shirt and dark jeans. He looks determined and serious.",
+  BAMBA: "Bamba: A 19-year-old Senegalese young man, lean, short curly hair, bright smile, wearing a red football jersey and denim shorts. He looks energetic.",
+  AICHA: "Aicha: A 26-year-old Senegalese woman, oval face, braided hair in a high bun, round glasses, wearing a mustard-yellow jacket with a camera strap across her chest.",
+  SARR: "Cheikh Sarr: A 55-year-old Senegalese man, tall, silver hair, trimmed goatee, calm cold eyes, wearing an impeccable navy three-piece suit and a gold watch. He looks intimidating."
 };
 
+// --- SCÉNARIO ÉPISODE 1 (Version Studio : Un seul dialogue par scène) ---
 const SHOTS = [
- {id:1,lieu:"Port, nuit",dialogue:[],prompt:"Low-angle wide shot, a cargo container bursts into orange flames at a night port, {MOUSSA} dives behind a crate, sparks flying, camera shake."},
- {id:2,lieu:"Appartement, aube",dialogue:[{perso:"MOUSSA",texte:"Ibou… je te dois la vérité."}],prompt:"Slow push-in close-up, {MOUSSA} holding an old photo of two police officers, dawn light through a window."},
- {id:3,lieu:"Toit, Médina",dialogue:[{perso:"BAMBA",texte:"Patron ! Un conteneur suspect arrive ce soir."}],prompt:"Medium shot on a rooftop, {BAMBA} stops a yellow motorbike and waves urgently at {MOUSSA}, golden morning light."},
- {id:4,lieu:"Toit",dialogue:[{perso:"MOUSSA",texte:"Qui t'a dit ça ?"},{perso:"BAMBA",texte:"Un docker, il avait peur."}],prompt:"Medium two-shot, {MOUSSA} and {BAMBA} facing each other, tense, Dakar rooftops behind them."},
- {id:5,lieu:"Rues de Dakar",dialogue:[],prompt:"Fast tracking shot, {MOUSSA} riding behind {BAMBA} on a motorbike through busy Dakar streets at dusk, motion blur."},
- {id:6,lieu:"Portail du port",dialogue:[{perso:"MOUSSA",texte:"Reste ici. Au moindre bruit, tu pars."}],prompt:"Medium shot at a port fence, {MOUSSA} cutting the wire while {BAMBA} watches nervously, night, harbor lights."},
- {id:7,lieu:"Piles de conteneurs",dialogue:[],prompt:"High-angle shot between towering containers, {MOUSSA} sneaking in the shadows as a searchlight sweeps past."},
- {id:8,lieu:"Conteneur ouvert",dialogue:[{perso:"MOUSSA",texte:"Des faux médicaments… des milliers de boîtes."}],prompt:"Medium close-up, {MOUSSA} opening a crate full of sealed medicine boxes and cash bundles, cold blue light."},
- {id:9,lieu:"Entrepôt",dialogue:[{perso:"VOIX",texte:"Fouillez tout. Il est là."}],prompt:"Wide shot, three silhouettes with flashlights enter the container alley, long shadows, tense atmosphere."},
- {id:10,lieu:"Course",dialogue:[],prompt:"Dynamic tracking shot, {MOUSSA} leaping between container rooftops, men chasing below, night."},
- {id:11,lieu:"Piège",dialogue:[],prompt:"Low-angle shot, {MOUSSA} kicks a lever and a stack of crates tumbles down, dust and debris, dramatic lighting."},
- {id:12,lieu:"Portail",dialogue:[{perso:"BAMBA",texte:"Monte ! Vite, patron !"}],prompt:"Medium shot, {BAMBA} revving the motorbike, {MOUSSA} sprinting toward him, black SUV headlights behind."},
- {id:13,lieu:"Poursuite",dialogue:[],prompt:"Chase shot from behind, motorbike weaving through narrow Medina alleys, two black SUVs pursuing, sparks and neon."},
- {id:14,lieu:"Marché",dialogue:[],prompt:"Slow-motion shot, motorbike jumping over a market stall, mangoes and oranges flying, camera orbiting."},
- {id:15,lieu:"Ruelle",dialogue:[{perso:"AICHA",texte:"Arrêtez de courir. J'ai ce qu'il vous faut."}],prompt:"Medium shot, {AICHA} stepping out of a dark alley holding a camera, {MOUSSA} and {BAMBA} stopping the bike."},
- {id:16,lieu:"Écran d'appareil photo",dialogue:[{perso:"MOUSSA",texte:"C'est Ibou… sur cette photo. Il est vivant."}],prompt:"Over-the-shoulder close-up, a camera screen showing {SARR} shaking hands with a man resembling an older police officer, {MOUSSA} stunned."},
- {id:17,lieu:"Gros plan",dialogue:[],prompt:"Extreme close-up of a phone buzzing on {MOUSSA}'s palm, unknown number, flickering streetlight."},
- {id:18,lieu:"Cliffhanger",dialogue:[{perso:"SARR",texte:"Viens seul, Moussa. Ibou t'attend."}],prompt:"Slow push-in on {MOUSSA}'s shocked face, phone at his ear, shallow depth of field, cut to black."}
+  {id:1, lieu:"Port de Dakar, Nuit", speaker:null, dialogue:"", 
+   action:"Low-angle wide shot, a cargo container bursts into orange flames at a night port, {MOUSSA} dives behind a crate, sparks flying.",
+   cam:"Camera shake, slow motion impact."},
+  
+  {id:2, lieu:"Appartement de Moussa, Aube", speaker:"MOUSSA", dialogue:"Ibou… je te dois la vérité.", 
+   action:"Slow push-in close-up, {MOUSSA} holding an old photo of two police officers, dawn light through a window.",
+   cam:"Slow push-in, shallow depth of field."},
+  
+  {id:3, lieu:"Toit de la Médina, Matin", speaker:"BAMBA", dialogue:"Patron ! Un conteneur suspect arrive ce soir.", 
+   action:"Medium shot on a rooftop, {BAMBA} stops a yellow motorbike and waves urgently at {MOUSSA}, golden morning light.",
+   cam:"Tracking shot following the motorbike, then settling on the two men."},
+  
+  {id:4, lieu:"Toit de la Médina, Matin", speaker:"MOUSSA", dialogue:"Qui t'a dit ça ?", 
+   action:"Medium two-shot, {MOUSSA} and {BAMBA} facing each other, tense, Dakar rooftops behind them.",
+   cam:"Static camera, slight handheld feel for tension."},
+  
+  {id:5, lieu:"Rues de Dakar, Crépuscule", speaker:null, dialogue:"", 
+   action:"Fast tracking shot, {MOUSSA} riding behind {BAMBA} on a motorbike through busy Dakar streets at dusk.",
+   cam:"Fast tracking shot, motion blur on the background."},
+  
+  {id:6, lieu:"Portail du Port, Nuit", speaker:"MOUSSA", dialogue:"Reste ici. Au moindre bruit, tu pars.", 
+   action:"Medium shot at a port fence, {MOUSSA} cutting the wire while {BAMBA} watches nervously, night, harbor lights.",
+   cam:"Static shot, tense atmosphere."},
+  
+  {id:7, lieu:"Piles de conteneurs, Nuit", speaker:null, dialogue:"", 
+   action:"High-angle shot between towering containers, {MOUSSA} sneaking in the shadows as a searchlight sweeps past.",
+   cam:"Slow pan following the searchlight."},
+  
+  {id:8, lieu:"Conteneur ouvert, Nuit", speaker:"MOUSSA", dialogue:"Des faux médicaments… des milliers de boîtes.", 
+   action:"Medium close-up, {MOUSSA} opening a crate full of sealed medicine boxes and cash bundles, cold blue light.",
+   cam:"Slow tilt down from his face to the crate."},
+  
+  {id:9, lieu:"Entrepôt, Nuit", speaker:"SARR", dialogue:"Fouillez tout. Il est là.", 
+   action:"Wide shot, three silhouettes with flashlights enter the container alley, long shadows. (Voiceover from Sarr, not seen).",
+   cam:"Slow dolly forward into the darkness."},
+  
+  {id:10, lieu:"Toits des conteneurs, Nuit", speaker:null, dialogue:"", 
+   action:"Dynamic tracking shot, {MOUSSA} leaping between container rooftops, men chasing below, night.",
+   cam:"Fast tracking shot, slight camera shake."},
+  
+  {id:11, lieu:"Allée du port, Nuit", speaker:null, dialogue:"", 
+   action:"Low-angle shot, {MOUSSA} kicks a lever and a stack of crates tumbles down, dust and debris.",
+   cam:"Slow motion impact, dramatic lighting."},
+  
+  {id:12, lieu:"Portail du Port, Nuit", speaker:"BAMBA", dialogue:"Monte ! Vite, patron !", 
+   action:"Medium shot, {BAMBA} revving the motorbike, {MOUSSA} sprinting toward him, black SUV headlights behind.",
+   cam:"Handheld camera, urgent movement."},
+  
+  {id:13, lieu:"Ruelles de la Médina, Nuit", speaker:null, dialogue:"", 
+   action:"Chase shot from behind, motorbike weaving through narrow Medina alleys, two black SUVs pursuing.",
+   cam:"Fast tracking shot from a drone perspective."},
+  
+  {id:14, lieu:"Marché de Dakar, Nuit", speaker:null, dialogue:"", 
+   action:"Slow-motion shot, motorbike jumping over a market stall, mangoes and oranges flying.",
+   cam:"Camera orbiting around the jump, slow motion."},
+  
+  {id:15, lieu:"Ruelle sombre, Nuit", speaker:"AICHA", dialogue:"Arrêtez de courir. J'ai ce qu'il vous faut.", 
+   action:"Medium shot, {AICHA} stepping out of a dark alley holding a camera, {MOUSSA} and {BAMBA} stopping the bike.",
+   cam:"Static shot, dramatic silhouette reveal."},
+  
+  {id:16, lieu:"Ruelle sombre, Nuit", speaker:"MOUSSA", dialogue:"C'est Ibou… sur cette photo. Il est vivant.", 
+   action:"Over-the-shoulder close-up, a camera screen showing {SARR} shaking hands with a man resembling an older police officer, {MOUSSA} stunned.",
+   cam:"Slow zoom into the camera screen."},
+  
+  {id:17, lieu:"Ruelle sombre, Nuit", speaker:null, dialogue:"", 
+   action:"Extreme close-up of a phone buzzing on {MOUSSA}'s palm, unknown number, flickering streetlight.",
+   cam:"Macro shot, shallow depth of field."},
+  
+  {id:18, lieu:"Ruelle sombre, Nuit", speaker:"SARR", dialogue:"Viens seul, Moussa. Ibou t'attend.", 
+   action:"Slow push-in on {MOUSSA}'s shocked face, phone at his ear, shallow depth of field. (Sarr's voice on the phone).",
+   cam:"Slow push-in, cut to black at the end."}
 ];
 
-// --- LOGIQUE ---
-const STATE = JSON.parse(localStorage.getItem('dakar_state')) || {};
+// --- LOGIQUE DE L'APPLICATION ---
+const STATE = JSON.parse(localStorage.getItem('dakar_studio_v1')) || {};
 SHOTS.forEach(s => {
   if (STATE[s.id] === undefined) STATE[s.id] = { done: false };
 });
 
 function saveState() {
-  localStorage.setItem('dakar_state', JSON.stringify(STATE));
+  localStorage.setItem('dakar_studio_v1', JSON.stringify(STATE));
 }
 
-function buildPrompt(shot) {
-  let p = shot.prompt;
+function buildPromptImage(shot) {
+  let p = shot.action;
   for (const [k,v] of Object.entries(PERSOS)) {
     p = p.split('{'+k+'}').join(v);
   }
-  return `${STYLE}\n\n${p}`;
+  return `${STYLE_3D}\n\nSCENE: ${p}`;
+}
+
+function buildPromptAnimation(shot) {
+  let p = shot.action;
+  for (const [k,v] of Object.entries(PERSOS)) {
+    p = p.split('{'+k+'}').join(v);
+  }
+  // On donne l'action + le mouvement de caméra
+  return `${STYLE_ANIM}\n\nSUBJECT MOTION: ${p}\n\nCAMERA MOVEMENT: ${shot.cam}`;
 }
 
 function copyText(text) {
@@ -113,42 +190,45 @@ function toggleDone(id) {
 function render() {
   document.getElementById('shots').innerHTML = SHOTS.map(s => {
     const isDone = STATE[s.id].done;
-    const imgPrompt = buildPrompt(s);
-    const dlgText = s.dialogue.map(d => `${d.perso}: ${d.texte}`).join('\n');
+    const imgPrompt = buildPromptImage(s);
+    const animPrompt = buildPromptAnimation(s);
     
     return `
     <div class="card ${isDone ? 'is-done' : ''}">
-      <div class="header-row">
+      <div class="shot-header">
         <div>
-          <div class="title">Plan ${s.id}</div>
-          <div class="lieu">${s.lieu}</div>
+          <div class="shot-title">Scène ${s.id}</div>
+          <div class="shot-lieu">${s.lieu}</div>
         </div>
+        <div class="shot-num">${s.id}</div>
       </div>
 
-      <div class="section-title">1. Prompt Image (Agnes / Midjourney)</div>
+      <div class="section-label">1. Génération Image (Storyboard)</div>
       <div class="prompt-box">
         ${imgPrompt}
         <button class="btn-copy" onclick="copyText(\`${imgPrompt.replace(/`/g, '\\`')}\`)">Copier</button>
       </div>
 
-      <div class="section-title">2. Prompt Vidéo (Image-to-Video)</div>
+      <div class="section-label">2. Animation (Vidéo)</div>
       <div class="prompt-box">
-        ${imgPrompt}
-        <button class="btn-copy" onclick="copyText(\`${imgPrompt.replace(/`/g, '\\`')}\`)">Copier</button>
+        ${animPrompt}
+        <button class="btn-copy" onclick="copyText(\`${animPrompt.replace(/`/g, '\\`')}\`)">Copier</button>
       </div>
 
-      ${dlgText ? `
-      <div class="section-title">3. Dialogue (Pour CapCut / TTS)</div>
+      ${s.speaker ? `
+      <div class="section-label">3. Dialogue (Audio)</div>
       <div class="dialogue-box">
-        ${dlgText.replace(/\n/g, '<br>')}
-        <button class="btn-copy" onclick="copyText(\`${dlgText.replace(/`/g, '\\`')}\`)">Copier</button>
+        <span class="dialogue-speaker">${s.speaker}</span>
+        "${s.dialogue}"
+        <button class="btn-copy" style="top: 50%; transform: translateY(-50%);" onclick="copyText(\`${s.dialogue.replace(/`/g, '\\`')}\`)">Copier</button>
       </div>
       ` : ''}
 
-      <div class="checkbox-row" onclick="toggleDone(${s.id})">
-        <input type="checkbox" ${isDone ? 'checked' : ''} onclick="event.stopPropagation(); toggleDone(${s.id})">
-        <span>Scène générée et téléchargée</span>
-      </div>
+      <label class="validation-row">
+        <input type="checkbox" ${isDone ? 'checked' : ''} onclick="event.preventDefault(); toggleDone(${s.id})">
+        <div class="validation-box"></div>
+        <span>Scène validée et exportée</span>
+      </label>
     </div>
     `;
   }).join('');
