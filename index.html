@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f1216">
-<title>Dakar Studio</title>
+<title>Dakar Studio - Magic Hour</title>
 <style>
   :root { --bg:#0f1216; --card:#1a1f26; --fg:#e8ecf1; --muted:#8a93a0;
           --accent:#ff8a3d; --ok:#2fbf71; --err:#e5484d; --warn:#f5a524; }
@@ -56,9 +56,9 @@
 </header>
 
 <section class="card">
-  <label style="font-size:13px;color:var(--muted)">Clé API Agnes</label>
+  <label style="font-size:13px;color:var(--muted)">Clé API Magic Hour</label>
   <div class="row" style="margin-top:8px">
-    <input id="key" type="password" placeholder="colle ta clé ici" style="flex:1">
+    <input id="key" type="password" placeholder="colle ta clé Magic Hour ici" style="flex:1">
     <button class="secondary" onclick="saveKey()">OK</button>
   </div>
   <div id="keyStatus" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
@@ -117,32 +117,24 @@ const log = m => {
   el.textContent = `[${t}] ${m}\n` + el.textContent;
   checkErrors();
 };
-const blobToB64 = blob => new Promise(res => {
-  const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]);
-  r.readAsDataURL(blob);
-});
-const b64ToBlob = (b64, type='image/png') => {
-  const bin = atob(b64); const arr = new Uint8Array(bin.length);
-  for (let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
-  return new Blob([arr], {type});
-};
 
 function saveKey() {
   const k = document.getElementById('key').value.trim();
-  if (k) { localStorage.setItem('agnes_key', k); refreshKeyStatus(); }
+  if (k) { localStorage.setItem('magichour_key', k); refreshKeyStatus(); }
 }
 function refreshKeyStatus() {
-  const k = localStorage.getItem('agnes_key');
+  const k = localStorage.getItem('magichour_key');
   document.getElementById('keyStatus').textContent =
     k ? `✓ clé enregistrée (${k.slice(0,6)}…)` : '⚠️ aucune clé enregistrée';
 }
 
-async function api(path, body, method='POST', retries=2) {
-  const key = localStorage.getItem('agnes_key');
+// --- APPELS API MAGIC HOUR ---
+async function api(path, body, method='POST', retries=3) {
+  const key = localStorage.getItem('magichour_key');
   if (!key) throw new Error('clé API manquante');
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const res = await fetch(`https://apihub.agnes-ai.com/v1${path}`, {
+      const res = await fetch(`https://api.magichour.ai/v1${path}`, {
         method,
         headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
         body: body ? JSON.stringify(body) : undefined
@@ -156,9 +148,8 @@ async function api(path, body, method='POST', retries=2) {
       
       if (!res.ok) {
         const errText = await res.text();
-        // Si le serveur vidéo est down (erreur 500), on attend 10s et on réessaie
         if (res.status >= 500 && attempt < retries) {
-          log(`⚠️ Serveur Agnes occupé (500). Nouvelle tentative dans 10s...`);
+          log(`⚠️ Serveur occupé (${res.status}). Nouvelle tentative dans 10s...`);
           await sleep(10000);
           continue;
         }
@@ -184,22 +175,20 @@ function buildPrompt(shot) {
   return `${STYLE}\n\n${p}`;
 }
 
+// 1. GÉNÉRATION IMAGE (Avec l'API Image de Magic Hour)
 async function genImage(shot) {
   const st = STATE[shot.id];
   st.status = 'image'; st.error = null; render();
   try {
     const d = await api('/images/generations', {
-      model: 'agnes-image-2.1-flash',
+      model: 'default',
       prompt: buildPrompt(shot),
-      size: '720x1280', n: 1, response_format: 'b64_json'
+      image_count: 1,
+      aspect_ratio: '9:16'
     });
-    const item = d.data[0];
-    const blob = item.b64_json
-      ? b64ToBlob(item.b64_json)
-      : await (await fetch(item.url)).blob();
-    st.imageBlob = blob;
-    st.imageUrl = URL.createObjectURL(blob);
-    log(`✓ image plan ${shot.id}`);
+    
+    st.imageUrl = d.data[0].url;
+    log(`✓ image plan ${shot.id} générée`);
     render();
     return true;
   } catch(e) {
@@ -210,39 +199,49 @@ async function genImage(shot) {
   }
 }
 
+// 2. GÉNÉRATION VIDÉO (Avec l'API Image-to-Video de Magic Hour)
 async function genVideo(shot) {
   const st = STATE[shot.id];
   st.status = 'video'; render();
   try {
-    const imgB64 = await blobToB64(st.imageBlob);
-    const job = await api('/videos', {
-      model: 'agnes-video-v2.0',
+    // On lance l'animation de l'image
+    const job = await api('/videos/generate', {
+      model: 'ltx-2.5',          // Modèle gratuit
+      image_url: st.imageUrl,    // L'URL de l'image générée
       prompt: buildPrompt(shot),
-      image: `data:image/png;base64,${imgB64}`,
-      width: 720, height: 1280, num_frames: 121, fps: 24
+      duration_seconds: 5,
+      resolution: '480p',        // Résolution pour le plan gratuit
+      aspect_ratio: '9:16'
     });
-    const id = job.video_id || job.id;
-    log(`⏳ vidéo plan ${shot.id} en file d'attente...`);
+
+    const projectId = job.project_id;
+    if (!projectId) throw new Error("Pas de project_id retourné");
+    
+    log(`⏳ vidéo plan ${shot.id} en cours...`);
+
+    // On attend que la vidéo soit prête
     let tries = 0;
-    while (tries < 20) {
-      await sleep(60000); // 1 check par minute
-      const d = await api(`/videos/${id}`, null, 'GET', 1);
-      const s = (d.status || '').toLowerCase();
-      if (['succeeded','completed','done','ready'].includes(s)) {
-        const url = d.url || d.video_url || (d.output && d.output.url);
-        const blob = await (await fetch(url)).blob();
-        st.videoBlob = blob;
-        st.videoUrl = URL.createObjectURL(blob);
+    while (tries < 60) {
+      await sleep(5000);
+      
+      const d = await api(`/videos/${projectId}`, null, 'GET');
+
+      if (d.status === 'complete') {
+        st.videoUrl = d.video_url;
         st.status = 'done';
         log(`✓ vidéo plan ${shot.id} terminée !`);
         render();
         return true;
       }
-      if (['failed','error'].includes(s)) throw new Error('tâche échouée');
+      
+      if (d.status === 'error' || d.status === 'failed') {
+        throw new Error('Échec côté serveur');
+      }
+      
       tries++;
-      if (tries % 2 === 0) log(`… plan ${shot.id} toujours en cours de rendu...`);
+      if (tries % 4 === 0) log(`… plan ${shot.id} toujours en cours...`);
     }
-    throw new Error('délai dépassé');
+    throw new Error('Délai dépassé');
   } catch(e) {
     st.status = 'error'; st.error = e.message;
     log(`✗ vidéo ${shot.id} : ${e.message}`);
@@ -253,8 +252,8 @@ async function genVideo(shot) {
 
 async function runShot(shot) {
   const st = STATE[shot.id];
-  if (!st.imageBlob) { if (!(await genImage(shot))) return; }
-  await sleep(3000); // Petite pause pour éviter le 429
+  if (!st.imageUrl) { if (!(await genImage(shot))) return; }
+  await sleep(2000); 
   await genVideo(shot);
 }
 
@@ -264,7 +263,7 @@ async function generateAll() {
   for (const shot of SHOTS) {
     if (STATE[shot.id].status === 'done') continue;
     await runShot(shot);
-    await sleep(5000); // Pause de 5s entre chaque plan
+    await sleep(3000); 
   }
   btn.disabled = false; btn.textContent = '▶ Générer tout';
   log('🏁 Terminé.');
@@ -274,10 +273,11 @@ async function retryErrors() {
   const btn = document.getElementById('btnRetry');
   btn.disabled = true; btn.textContent = '⏳...';
   const errors = SHOTS.filter(s => STATE[s.id].status === 'error');
-  log(`↻ Relance de ${errors.length} plans en erreur...`);
+  log(`↻ Relance de ${errors.length} plans...`);
   for (const shot of errors) {
-    await runShot(shot);
-    await sleep(5000);
+    if (!STATE[shot.id].imageUrl) await genImage(shot);
+    await genVideo(shot);
+    await sleep(3000);
   }
   btn.disabled = false; btn.textContent = '↻ Réessayer les erreurs';
 }
@@ -297,12 +297,13 @@ function download(blob, filename) {
 function downloadShot(shot) {
   const st = STATE[shot.id];
   const n = `ep01_plan_${String(shot.id).padStart(2,'0')}`;
-  if (st.videoBlob) download(st.videoBlob, n + '.mp4');
-  else if (st.imageBlob) download(st.imageBlob, n + '.png');
+  if (st.videoUrl) {
+      download(new Blob([st.videoUrl]), n + '.mp4'); // Téléchargement direct de l'URL
+  }
 }
 async function downloadAll() {
   for (const shot of SHOTS) {
-    if (STATE[shot.id].videoBlob) {
+    if (STATE[shot.id].videoUrl) {
       downloadShot(shot);
       await sleep(1000);
     }
@@ -329,7 +330,7 @@ function render() {
         <span class="badge s-${st.status}">${label}${err}</span>
         <div class="actions">
           <button onclick="runShot(SHOTS[${s.id-1}])">${st.status==='done'?'↻ régénérer':'▶ générer'}</button>
-          ${st.videoBlob||st.imageBlob
+          ${st.videoUrl
             ? `<button class="secondary" onclick="downloadShot(SHOTS[${s.id-1}])">⬇ télécharger</button>`
             : ''}
         </div>
