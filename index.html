@@ -128,7 +128,7 @@ function refreshKeyStatus() {
     k ? `✓ clé enregistrée (${k.slice(0,6)}…)` : '⚠️ aucune clé enregistrée';
 }
 
-// --- APPELS API MAGIC HOUR ---
+// Fonction API générique
 async function api(path, body, method='POST', retries=3) {
   const key = localStorage.getItem('magichour_key');
   if (!key) throw new Error('clé API manquante');
@@ -175,22 +175,43 @@ function buildPrompt(shot) {
   return `${STYLE}\n\n${p}`;
 }
 
-// 1. GÉNÉRATION IMAGE (Avec l'API Image de Magic Hour)
+// 1. GÉNÉRATION IMAGE (Magic Hour)
 async function genImage(shot) {
   const st = STATE[shot.id];
   st.status = 'image'; st.error = null; render();
   try {
-    const d = await api('/images/generations', {
-      model: 'default',
-      prompt: buildPrompt(shot),
+    // A. Création du projet image
+    const job = await api('/ai-image-generator', {
+      name: `Plan ${shot.id} - ${shot.lieu}`,
       image_count: 1,
-      aspect_ratio: '9:16'
+      model: 'z-image-turbo',
+      aspect_ratio: '9:16',
+      resolution: '720p',
+      style: {
+        prompt: buildPrompt(shot),
+        tool: 'ai-anime-generator' // ou 'ai-image-generator' standard
+      }
     });
     
-    st.imageUrl = d.data[0].url;
-    log(`✓ image plan ${shot.id} générée`);
-    render();
-    return true;
+    const projectId = job.id;
+    if (!projectId) throw new Error("Pas d'ID de projet image");
+
+    // B. Attente de la fin de génération
+    let tries = 0;
+    while (tries < 30) {
+      await sleep(3000);
+      const d = await api(`/image-projects/${projectId}`, null, 'GET');
+      
+      if (d.status === 'complete') {
+        st.imageUrl = d.downloads[0].url;
+        log(`✓ image plan ${shot.id} générée`);
+        render();
+        return true;
+      }
+      if (d.status === 'error') throw new Error('Échec génération image');
+      tries++;
+    }
+    throw new Error('Délai image dépassé');
   } catch(e) {
     st.status = 'error'; st.error = e.message;
     log(`✗ image ${shot.id} : ${e.message}`);
@@ -199,49 +220,47 @@ async function genImage(shot) {
   }
 }
 
-// 2. GÉNÉRATION VIDÉO (Avec l'API Image-to-Video de Magic Hour)
+// 2. GÉNÉRATION VIDÉO (Magic Hour)
 async function genVideo(shot) {
   const st = STATE[shot.id];
   st.status = 'video'; render();
   try {
-    // On lance l'animation de l'image
-    const job = await api('/videos/generate', {
-      model: 'ltx-2.5',          // Modèle gratuit
-      image_url: st.imageUrl,    // L'URL de l'image générée
-      prompt: buildPrompt(shot),
-      duration_seconds: 5,
-      resolution: '480p',        // Résolution pour le plan gratuit
-      aspect_ratio: '9:16'
+    // A. Création du projet vidéo
+    const job = await api('/image-to-video', {
+      name: `Plan ${shot.id} - ${shot.lieu}`,
+      end_seconds: 5,
+      model: 'ltx-2.5',
+      resolution: '480p',
+      audio: false,
+      style: { prompt: buildPrompt(shot) },
+      assets: {
+        image_file_path: st.imageUrl // On passe l'URL publique de l'image
+      }
     });
 
-    const projectId = job.project_id;
-    if (!projectId) throw new Error("Pas de project_id retourné");
+    const projectId = job.id;
+    if (!projectId) throw new Error("Pas d'ID de projet vidéo");
     
     log(`⏳ vidéo plan ${shot.id} en cours...`);
 
-    // On attend que la vidéo soit prête
+    // B. Attente de la fin de génération
     let tries = 0;
     while (tries < 60) {
       await sleep(5000);
+      const d = await api(`/video-projects/${projectId}`, null, 'GET');
       
-      const d = await api(`/videos/${projectId}`, null, 'GET');
-
       if (d.status === 'complete') {
-        st.videoUrl = d.video_url;
+        st.videoUrl = d.downloads[0].url;
         st.status = 'done';
         log(`✓ vidéo plan ${shot.id} terminée !`);
         render();
         return true;
       }
-      
-      if (d.status === 'error' || d.status === 'failed') {
-        throw new Error('Échec côté serveur');
-      }
-      
+      if (d.status === 'error') throw new Error('Échec génération vidéo');
       tries++;
       if (tries % 4 === 0) log(`… plan ${shot.id} toujours en cours...`);
     }
-    throw new Error('Délai dépassé');
+    throw new Error('Délai vidéo dépassé');
   } catch(e) {
     st.status = 'error'; st.error = e.message;
     log(`✗ vidéo ${shot.id} : ${e.message}`);
@@ -287,19 +306,17 @@ function checkErrors() {
   document.getElementById('btnRetry').style.display = hasErrors ? 'block' : 'none';
 }
 
-function download(blob, filename) {
+function download(url, filename) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = filename;
   document.body.appendChild(a); a.click();
-  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  setTimeout(() => { a.remove(); }, 1500);
 }
 function downloadShot(shot) {
   const st = STATE[shot.id];
-  const n = `ep01_plan_${String(shot.id).padStart(2,'0')}`;
-  if (st.videoUrl) {
-      download(new Blob([st.videoUrl]), n + '.mp4'); // Téléchargement direct de l'URL
-  }
+  const n = `ep01_plan_${String(shot.id).padStart(2,'0')}.mp4`;
+  if (st.videoUrl) download(st.videoUrl, n);
 }
 async function downloadAll() {
   for (const shot of SHOTS) {
